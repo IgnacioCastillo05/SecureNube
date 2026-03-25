@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SecureNube</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="noise"></div>
+
+    <header class="header">
+      <div class="logo">
+        <span class="logo-icon">&#9956;</span>
+        <span class="logo-text">SecureNube</span>
+      </div>
+      <div class="status-bar">
+        <span class="status-dot" id="status-dot"></span>
+        <span class="status-label" id="status-label">desconectado</span>
+      </div>
+    </header>
+
+    <main class="main">
+      <!-- Panel izquierdo: formularios -->
+      <section class="panel panel--forms">
+
+        <div class="card" id="card-register">
+          <div class="card-tag">01</div>
+          <h2 class="card-title">Registro</h2>
+          <p class="card-desc">Crea una cuenta. La contraseña se guarda con hash BCrypt.</p>
+          <div class="field-group">
+            <label class="field-label" for="reg-email">Email</label>
+            <input class="field-input" id="reg-email" type="email" placeholder="usuario@ejemplo.com" autocomplete="off" />
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="reg-password">Contraseña</label>
+            <input class="field-input" id="reg-password" type="password" placeholder="••••••••" />
+          </div>
+          <button class="btn" id="reg-btn">
+            <span>Crear cuenta</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <pre class="output" id="reg-output"></pre>
+        </div>
+
+        <div class="card" id="card-login">
+          <div class="card-tag">02</div>
+          <h2 class="card-title">Login</h2>
+          <p class="card-desc">Autenticación HTTP Basic sobre TLS.</p>
+          <div class="field-group">
+            <label class="field-label" for="login-email">Email</label>
+            <input class="field-input" id="login-email" type="email" placeholder="usuario@ejemplo.com" autocomplete="off" />
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="login-password">Contraseña</label>
+            <input class="field-input" id="login-password" type="password" placeholder="••••••••" />
+          </div>
+          <button class="btn" id="login-btn">
+            <span>Iniciar sesión</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <pre class="output" id="login-output"></pre>
+        </div>
+
+        <div class="card" id="card-hello">
+          <div class="card-tag">03</div>
+          <h2 class="card-title">API protegida</h2>
+          <p class="card-desc">Llama a <code>/api/hello</code> con las credenciales del login.</p>
+          <button class="btn btn--accent" id="hello-btn">
+            <span>Llamar /api/hello</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <pre class="output" id="hello-output"></pre>
+        </div>
+
+      </section>
+
+      <!-- Panel derecho: info de arquitectura -->
+      <aside class="panel panel--info">
+        <div class="arch-block">
+          <h3 class="arch-title">Arquitectura</h3>
+          <div class="arch-diagram">
+            <div class="arch-node arch-node--client">
+              <span class="arch-node-label">Browser</span>
+              <span class="arch-node-sub">Apache · TLS 443</span>
+            </div>
+            <div class="arch-arrow">
+              <span class="arch-arrow-label">HTTPS</span>
+              <svg width="40" height="20" viewBox="0 0 40 20"><path d="M2 10h36M30 4l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="arch-node arch-node--api">
+              <span class="arch-node-label">Spring API</span>
+              <span class="arch-node-sub">EC2 · TLS 8443</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="features-block">
+          <h3 class="arch-title">Seguridad</h3>
+          <ul class="feature-list">
+            <li class="feature-item">
+              <span class="feature-icon"></span>
+              <div>
+                <strong>TLS end-to-end</strong>
+                <p>Let's Encrypt en Apache y Spring.</p>
+              </div>
+            </li>
+            <li class="feature-item">
+              <span class="feature-icon"></span>
+              <div>
+                <strong>BCrypt hashing</strong>
+                <p>Contraseñas nunca en texto plano.</p>
+              </div>
+            </li>
+            <li class="feature-item">
+              <span class="feature-icon"></span>
+              <div>
+                <strong>HTTP Basic Auth</strong>
+                <p>Credenciales validadas en cada request.</p>
+              </div>
+            </li>
+            <li class="feature-item">
+              <span class="feature-icon"></span>
+              <div>
+                <strong>AWS EC2</strong>
+                <p>Dos instancias independientes.</p>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="endpoints-block">
+          <h3 class="arch-title">Endpoints</h3>
+          <div class="endpoint-list">
+            <div class="endpoint">
+              <span class="endpoint-method endpoint-method--post">POST</span>
+              <code>/api/auth/register</code>
+            </div>
+            <div class="endpoint">
+              <span class="endpoint-method endpoint-method--post">POST</span>
+              <code>/api/auth/login</code>
+            </div>
+            <div class="endpoint">
+              <span class="endpoint-method endpoint-method--get">GET</span>
+              <code>/api/hello</code>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
