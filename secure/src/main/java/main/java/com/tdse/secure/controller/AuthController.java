@@ -32,10 +32,11 @@ public class AuthController {
         }
 
         try {
-            authService.register(email, password);
+            String token = authService.register(email, password);
             return ResponseEntity.ok(Map.of(
-                "status",  "registered",
-                "message", "Cuenta creada. Revisa tu email para verificarla."
+                "status",            "registered",
+                "message",           "Cuenta creada. Usa el token para verificar tu cuenta en /api/auth/verify?token=",
+                "verificationToken", token
             ));
         } catch (IllegalArgumentException | IllegalStateException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));

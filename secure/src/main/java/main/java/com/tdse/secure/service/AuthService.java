@@ -6,8 +6,6 @@ import main.java.com.tdse.secure.repository.AppUserRepository;
 import main.java.com.tdse.secure.repository.VerificationTokenRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
@@ -25,19 +23,16 @@ public class AuthService {
     private final AppUserRepository repo;
     private final VerificationTokenRepository tokenRepo;
     private final PasswordEncoder encoder;
-    private final JavaMailSender mailSender;
 
     public AuthService(AppUserRepository repo,
                        VerificationTokenRepository tokenRepo,
-                       PasswordEncoder encoder,
-                       JavaMailSender mailSender) {
+                       PasswordEncoder encoder) {
         this.repo      = repo;
         this.tokenRepo = tokenRepo;
         this.encoder   = encoder;
-        this.mailSender = mailSender;
     }
 
-    public void register(String email, String password) {
+    public String register(String email, String password) {
         validatePassword(password);
 
         if (repo.existsByEmail(email)) {
@@ -49,9 +44,9 @@ public class AuthService {
 
         String token = UUID.randomUUID().toString();
         tokenRepo.save(new VerificationToken(token, user, LocalDateTime.now().plusHours(24)));
-        sendVerificationEmail(email, token);
 
-        log.info("Usuario registrado, verificación enviada a: {}", email);
+        log.info("Usuario registrado, token de verificación generado para: {}", email);
+        return token;
     }
 
     public void verifyEmail(String token) {
@@ -80,15 +75,5 @@ public class AuthService {
         if (!SPECIAL.matcher(password).matches()) {
             throw new IllegalArgumentException("La contraseña debe tener al menos un carácter especial (!@#$%...)");
         }
-    }
-
-    private void sendVerificationEmail(String email, String token) {
-        String link = "https://andresrendon.duckdns.org:8443/api/auth/verify?token=" + token;
-        SimpleMailMessage msg = new SimpleMailMessage();
-        msg.setTo(email);
-        msg.setSubject("Verifica tu cuenta - SecureNube");
-        msg.setText("Haz clic en el siguiente enlace para verificar tu cuenta:\n\n"
-                  + link + "\n\nEste enlace expira en 24 horas.");
-        mailSender.send(msg);
     }
 }
