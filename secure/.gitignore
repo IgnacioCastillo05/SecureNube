@@ -33,4 +33,7 @@ build/
 .vscode/
 
 
-.pem
+*.pem
+
+# Base de datos H2 (datos de runtime, no van al repo)
+data/
