@@ -1,6 +1,5 @@
 package main.java.com.tdse.secure.config;
 
-
 import main.java.com.tdse.secure.service.AppUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,6 +11,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -27,13 +27,17 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
-            .cors(Customizer.withDefaults())        
+            .cors(Customizer.withDefaults())
+
+            // Rate limiting ANTES del BasicAuthenticationFilter
+            .addFilterBefore(new LoginRateLimitFilter(), BasicAuthenticationFilter.class)
+
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/register").permitAll()  
-                .requestMatchers("/api/auth/login").authenticated() 
-                .anyRequest().authenticated()                       
+                .requestMatchers("/api/auth/register").permitAll()
+                .requestMatchers("/api/auth/login").authenticated()
+                .anyRequest().authenticated()
             )
-            .httpBasic(Customizer.withDefaults());    
+            .httpBasic(Customizer.withDefaults());
 
         return http.build();
     }
