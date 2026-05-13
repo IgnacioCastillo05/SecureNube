@@ -14,8 +14,10 @@ public class CorsConfig {
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // SOLO el frontend local 
-        config.setAllowedOrigins(List.of("http://127.0.0.1:5501"));
+        config.setAllowedOrigins(List.of(
+            "http://127.0.0.1:5501",
+            "https://ignaciocastillo.duckdns.org"
+        ));
 
         // Solo lo necesario en esta app
         config.setAllowedMethods(List.of("GET", "POST", "OPTIONS"));
