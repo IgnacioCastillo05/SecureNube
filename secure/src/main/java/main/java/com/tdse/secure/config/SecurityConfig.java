@@ -28,12 +28,9 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .cors(Customizer.withDefaults())
-
-            // Rate limiting ANTES del BasicAuthenticationFilter
             .addFilterBefore(new LoginRateLimitFilter(), BasicAuthenticationFilter.class)
-
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/register").permitAll()
+                .requestMatchers("/api/auth/register", "/api/auth/verify").permitAll()
                 .requestMatchers("/api/auth/login").authenticated()
                 .anyRequest().authenticated()
             )

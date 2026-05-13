@@ -8,24 +8,32 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.Deque;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 public class LoginRateLimitFilter extends OncePerRequestFilter {
 
-    private static final int MAX_ATTEMPTS = 5;
+    private static final Logger log = LoggerFactory.getLogger(LoginRateLimitFilter.class);
+
+    private static final int MAX_ATTEMPTS    = 5;
     private static final long WINDOW_SECONDS = 60;
+
+    private static final Set<String> RATE_LIMITED_PATHS = Set.of(
+        "/api/hello",
+        "/api/auth/login",
+        "/api/auth/register"
+    );
 
     private final Map<String, Deque<Long>> attemptsByIp = new ConcurrentHashMap<>();
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        // En HTTP Basic, el "login" ocurre cuando intentan acceder a un endpoint protegido.
-        // Limitamos /api/hello para mitigar fuerza bruta.
-        return !(request.getRequestURI().equals("/api/hello")
-                && request.getMethod().equalsIgnoreCase("GET"));
+        return !RATE_LIMITED_PATHS.contains(request.getRequestURI());
     }
 
     @Override
@@ -36,26 +44,23 @@ public class LoginRateLimitFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         String ip = request.getRemoteAddr();
-        long now = Instant.now().getEpochSecond();
+        long now  = Instant.now().getEpochSecond();
 
         Deque<Long> q = attemptsByIp.computeIfAbsent(ip, k -> new ConcurrentLinkedDeque<>());
 
-        // Limpia intentos fuera de la ventana
         while (!q.isEmpty() && (now - q.peekFirst()) > WINDOW_SECONDS) {
             q.pollFirst();
         }
 
-        // Si excede límite, bloquear
         if (q.size() >= MAX_ATTEMPTS) {
-            response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value()); // 429
+            log.warn("Rate limit excedido para IP {} en {}", ip, request.getRequestURI());
+            response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
             response.setContentType("application/json");
-            response.getWriter().write("{\"error\":\"Too many authentication attempts. Try again later.\"}");
+            response.getWriter().write("{\"error\":\"Demasiados intentos. Espera un momento.\"}");
             return;
         }
 
-        // Registrar intento (cada request a /api/hello cuenta como intento)
         q.addLast(now);
-
         filterChain.doFilter(request, response);
     }
 }

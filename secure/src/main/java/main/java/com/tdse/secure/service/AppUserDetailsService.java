@@ -1,6 +1,5 @@
 package main.java.com.tdse.secure.service;
 
-
 import main.java.com.tdse.secure.repository.AppUserRepository;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,6 +21,7 @@ public class AppUserDetailsService implements UserDetailsService {
         return repo.findByEmail(email)
             .map(u -> User.withUsername(u.getEmail())
                 .password(u.getPasswordHash())
+                .disabled(!u.isVerified())
                 .roles("USER")
                 .build())
             .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + email));
